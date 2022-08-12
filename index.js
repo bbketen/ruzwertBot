@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const mysql = require('mysql');
 const fs = require("fs");
 const botsettings = require("./botsettings.json");
+const youtube = require('discord-bot-youtube-notifications')
 const bot = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 require("./util/eventHandler")(bot)
@@ -38,6 +39,13 @@ bot.login(process.env.token);
 //bot.login(botsettings.token);
 
 bot.on('message', async msg => {
+    const Notifier = new youtube.notifier(client,{
+        message: "@everyone Merhaba, Yeni video yayında!! **{title}**\n Beğenmeyi ve Abone olmayı Unutmayınız Efenim!!\n {url}"
+    });
+    const youtubeChannelID = "UCG_qMBd3tQndMrci97P2GLA"
+    const channel = "994908802472222741";
+    Notifier.addNotifier(youtubeChannelID,channel);
+
     let prefix = botsettings.prefix;
     let messageArray;
     if(msg.content.includes('-')){

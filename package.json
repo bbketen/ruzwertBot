@@ -1,5 +1,5 @@
 {
-  "name": "hatred",
+  "name": "ruzwertbot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,6 +9,7 @@
   "author": "Berat Batuhan Keten",
   "license": "ISC",
   "dependencies": {
+    "discord-bot-youtube-notifications": "^1.1.4",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",

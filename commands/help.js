@@ -5,7 +5,7 @@ module.exports.run = async (bot,message,args) => {
     message.channel.send(
         "-*msg   --Örnek:*msg Officer Yazılacak mesaj veya *msg-Guild Member-Yazılacak mesaj\n"+
         "-*status --botun online durumunu kontrol eder\n"+
-        "-*move  --Örnek:*move-oda1-oda7 veya *move-all-oda5"
+        "-*move  --Örnek:*move-oda1-oda7 veya *move-all-oda5\n"
     );
 }
 
