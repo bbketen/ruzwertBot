@@ -36,8 +36,8 @@ bot.on("ready", () => {
 });
 
 
-//bot.login(process.env.token);
-bot.login(bot.config.token)
+bot.login(process.env.token);
+//bot.login(bot.config.token)
 
 bot.on('message', async msg => {
     let prefix = botsettings.prefix;
