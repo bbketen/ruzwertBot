@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const mysql = require('mysql');
 const fs = require("fs");
 const botsettings = require("./botsettings.json");
-//const youtube = require('discord-bot-youtube-notifications')
 const bot = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 const client = new Discord.Client();
 bot.db = require("quick.db");
@@ -36,25 +35,11 @@ bot.on("ready", () => {
     handleUploads();
 });
 
-/*const con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "testHatred"
-})*/
 
-bot.login(process.env.token);
-//bot.login(botsettings.token);
-//bot.login(bot.config.token)
+//bot.login(process.env.token);
+bot.login(bot.config.token)
 
 bot.on('message', async msg => {
-    /*const Notifier = new youtube.notifier(client,{
-        message: "@everyone Merhaba, Yeni video yayında!! **{title}**\n Beğenmeyi ve Abone olmayı Unutmayınız Efenim!!\n {url}"
-    });
-    const youtubeChannelID = "UCG_qMBd3tQndMrci97P2GLA"
-    const channel = "994908802472222741";
-    Notifier.addNotifier(youtubeChannelID,channel);*/
-
     let prefix = botsettings.prefix;
     let messageArray;
     if(msg.content.includes('-')){
@@ -62,10 +47,8 @@ bot.on('message', async msg => {
     } else{
         messageArray = msg.content.split(" ");
     }
-    
     let cmd = messageArray[0];
     let args = messageArray.slice(1);
-
     if(!msg.content.startsWith(prefix)) return;
     let commandfile = bot.commands.get(cmd.slice(prefix.length)) || bot.commands.get(bot.aliases.get(cmd.slice(prefix.length)));
     if(commandfile) commandfile.run(bot,msg,args);
@@ -80,18 +63,15 @@ function handleUploads() {
         .then(data => {
             if (bot.db.fetch(`postedVideos`).includes(data.items[0].link)) return;
             else {
-                console.log("dosya buldum!!");
                 bot.db.set(`videoData`, data.items[0]);
                 bot.db.push("postedVideos", data.items[0].link);
                 let parsed = bot.db.fetch(`videoData`);
                 let channel = bot.channels.cache.get(bot.config.channel);
-                console.log(channel);
                 if (!channel) return;
                 let message = bot.config.messageTemplate
                     .replace(/{author}/g, parsed.author)
                     .replace(/{title}/g, Discord.Util.escapeMarkdown(parsed.title))
                     .replace(/{url}/g, parsed.link);
-                console.log(message);
                 channel.send(message);
             }
         });
