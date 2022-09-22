@@ -13,6 +13,19 @@ require("./util/eventHandler")(bot)
 bot.commands = new Discord.Collection();
 bot.aliases = new Discord.Collection();
 
+
+var con = mysql.createConnection({
+    host: bot.config.host,
+    user: bot.config.user,
+    password: bot.config.password,
+    database: bot.config.database
+  });
+
+  con.connect(function(err) {
+    if (err) throw err;
+    console.log("Mysql Connected!");
+  });
+
 fs.readdir("./commands/", (err,files) => {
     if(err){
         console.log(err);
@@ -31,7 +44,7 @@ fs.readdir("./commands/", (err,files) => {
     });
 });
 
-bot.on("ready", () => {
+bot.on("ready", async () => {
     handleUploads();
 });
 
@@ -56,24 +69,41 @@ bot.on('message', async msg => {
 })
 
 function handleUploads() {
-    console.log("deniyorum!!");
-    if (bot.db.fetch(`postedVideos`) === null) bot.db.set(`postedVideos`, []);
+    console.log("Yeni video kontrol döngüsü giriliyor!!");
+    let degisken=0;
     setInterval(() => {
         bot.request.parseURL(`https://www.youtube.com/feeds/videos.xml?channel_id=${bot.config.channel_id}`)
         .then(data => {
-            if (bot.db.fetch(`postedVideos`).includes(data.items[0].link)) return;
-            else {
-                bot.db.set(`videoData`, data.items[0]);
-                bot.db.push("postedVideos", data.items[0].link);
-                let parsed = bot.db.fetch(`videoData`);
-                let channel = bot.channels.cache.get(bot.config.channel);
-                if (!channel) return;
-                let message = bot.config.messageTemplate
-                    .replace(/{author}/g, parsed.author)
-                    .replace(/{title}/g, Discord.Util.escapeMarkdown(parsed.title))
-                    .replace(/{url}/g, parsed.link);
-                channel.send(message);
-            }
+            sql=`SELECT * FROM youtube_video where link ='`+data.items[0].link+`'`;
+            con.query(sql,function(err,result) {
+                if(err){
+                    throw err;
+                } else{
+                    if(result.length>0){
+                        return;
+                    }else{
+                        console.log("Yeni video tespit edildi. Paylaşılıyor.");
+                        let channel = bot.channels.cache.get(bot.config.channel);
+                        if (!channel) return;
+                        let message = bot.config.messageTemplate
+                            .replace(/{author}/g, data.items[0].author)
+                            .replace(/{title}/g, Discord.Util.escapeMarkdown(data.items[0].title))
+                            .replace(/{url}/g, data.items[0].link);
+                        channel.send(message);
+                        insert_videos(data.items[0].link);
+                        console.log("Yeni video eskilerin içine eklendi.");
+                    }
+                } 
+            });
         });
     }, bot.config.watchInterval);
+}
+
+function insert_videos(link){
+    sql=`INSERT INTO youtube_video(link) VALUES('${link}')`;
+      con.query(sql,function(err,result) {
+          if(err){
+              throw err;
+          }
+      });
 }
